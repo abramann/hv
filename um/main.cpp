@@ -93,7 +93,7 @@ int main() {
     }
     printf("[+] crackme.exe  CR3=0x%llX\n", target_cr3);
 
-    uintptr_t target_va = 0x000000014000131D;
+    uintptr_t target_va = 0x00B312A5; //0x000000014000131D;
     printf("[+] MessageBoxW in notepad: 0x%llX\n",
         static_cast<uint64_t>(target_va));
 

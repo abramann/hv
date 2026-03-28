@@ -10,20 +10,30 @@
 
 namespace hv {
 
-void emulate_cpuid(vcpu* const cpu) {
-  auto const ctx = cpu->ctx;
+    void emulate_cpuid(vcpu* const cpu) {
+        auto const ctx = cpu->ctx;
 
-  int regs[4];
-  __cpuidex(regs, ctx->eax, ctx->ecx);
+        int regs[4];
+        __cpuidex(regs, ctx->eax, ctx->ecx);
 
-  ctx->rax = regs[0];
-  ctx->rbx = regs[1];
-  ctx->rcx = regs[2];
-  ctx->rdx = regs[3];
+        if (ctx->eax == 0x1) {
+            regs[2] &= ~(1u << 31);  // clear HV present bit
+        }
+        else if (ctx->eax >= 0x40000000 && ctx->eax <= 0x400000FF) {
+            regs[0] = 0;
+            regs[1] = 0;
+            regs[2] = 0;
+            regs[3] = 0;
+        }
 
-  cpu->hide_vm_exit_overhead = true;
-  skip_instruction();
-}
+        ctx->rax = regs[0];
+        ctx->rbx = regs[1];
+        ctx->rcx = regs[2];
+        ctx->rdx = regs[3];
+
+        cpu->hide_vm_exit_overhead = true;
+        skip_instruction();
+    }
 
 void emulate_rdmsr(vcpu* const cpu) {
   if (cpu->ctx->ecx == IA32_FEATURE_CONTROL) {
